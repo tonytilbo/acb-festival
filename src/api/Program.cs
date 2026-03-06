@@ -1,4 +1,5 @@
-using System.Collections.Concurrent;
+using Azure.Data.Tables;
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +14,26 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Azure Table Storage — uses Managed Identity in production (AZURE_STORAGE_ACCOUNT_NAME set),
+// falls back to Azurite / connection string for local development.
+builder.Services.AddSingleton<TableClient>(_ =>
+{
+    var accountName = builder.Configuration["AZURE_STORAGE_ACCOUNT_NAME"];
+    if (!string.IsNullOrEmpty(accountName))
+    {
+        var endpoint = new Uri($"https://{accountName}.table.core.windows.net");
+        return new TableClient(endpoint, "Ratings", new DefaultAzureCredential());
+    }
+
+    var connectionString = builder.Configuration.GetConnectionString("AzureStorage")
+        ?? "UseDevelopmentStorage=true";
+    return new TableClient(connectionString, "Ratings");
+});
+
 var app = builder.Build();
+
+var tableClient = app.Services.GetRequiredService<TableClient>();
+await tableClient.CreateIfNotExistsAsync();
 
 if (app.Environment.IsDevelopment())
 {
@@ -21,9 +41,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
-
-// In-memory ratings store: (userId, beerId) -> rating
-var ratings = new ConcurrentDictionary<(string UserId, int BeerId), int>();
 
 app.MapPost("/api/register", () =>
 {
@@ -35,28 +52,37 @@ app.MapPost("/api/register", () =>
 app.MapGet("/api/beers", () => Results.Ok(BeerData.All))
    .WithName("GetBeers");
 
-app.MapGet("/api/ratings", (string userId) =>
+app.MapGet("/api/ratings", async (string userId, TableClient table) =>
 {
-    var userRatings = ratings
-        .Where(kvp => kvp.Key.UserId == userId)
-        .ToDictionary(kvp => kvp.Key.BeerId, kvp => kvp.Value);
+    var userRatings = new Dictionary<int, int>();
+    await foreach (var entity in table.QueryAsync<RatingEntity>(e => e.PartitionKey == userId))
+    {
+        if (int.TryParse(entity.RowKey, out var beerId))
+            userRatings[beerId] = entity.Rating;
+    }
     return Results.Ok(userRatings);
 })
 .WithName("GetRatings");
 
-app.MapPost("/api/ratings", (RatingRequest request) =>
+app.MapPost("/api/ratings", async (RatingRequest request, TableClient table) =>
 {
     if (request.Rating < 1 || request.Rating > 10)
         return Results.BadRequest(new { error = "Rating must be between 1 and 10." });
 
-    ratings[(request.UserId, request.BeerId)] = request.Rating;
+    var entity = new RatingEntity
+    {
+        PartitionKey = request.UserId,
+        RowKey       = request.BeerId.ToString(),
+        Rating       = request.Rating,
+    };
+    await table.UpsertEntityAsync(entity);
     return Results.Ok(new { request.UserId, request.BeerId, request.Rating });
 })
 .WithName("SubmitRating");
 
-app.MapDelete("/api/ratings", (string userId, int beerId) =>
+app.MapDelete("/api/ratings", async (string userId, int beerId, TableClient table) =>
 {
-    ratings.TryRemove((userId, beerId), out _);
+    await table.DeleteEntityAsync(userId, beerId.ToString());
     return Results.NoContent();
 })
 .WithName("ClearRating");
@@ -66,6 +92,15 @@ app.Run();
 record Beer(int Id, string BrewersName, string BeerName, string Style, decimal Abv, string Description, string ServingMethod);
 
 record RatingRequest(string UserId, int BeerId, int Rating);
+
+class RatingEntity : ITableEntity
+{
+    public string PartitionKey { get; set; } = string.Empty; // userId
+    public string RowKey       { get; set; } = string.Empty; // beerId
+    public int    Rating       { get; set; }
+    public DateTimeOffset? Timestamp { get; set; }
+    public Azure.ETag ETag { get; set; }
+}
 
 static class BeerData
 {

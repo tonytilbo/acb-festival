@@ -1,0 +1,5 @@
+subscription_id     = "00000000-0000-0000-0000-000000000000"
+location            = "uksouth"
+resource_group_name = "acb-festival"
+app_name            = "acb-festival"
+custom_domain       = "festival.angliancraftbrewers.org.uk"
