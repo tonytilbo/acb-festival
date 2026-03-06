@@ -1,6 +1,8 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
+export type ServingMethod = 'Cask' | 'Keg'
+
 export interface Beer {
   id: number
   brewersName: string
@@ -8,6 +10,7 @@ export interface Beer {
   style: string
   abv: number
   description: string
+  servingMethod: ServingMethod
 }
 
 export const useBeersStore = defineStore('beers', () => {

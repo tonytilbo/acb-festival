@@ -45,6 +45,9 @@ function abvColour(abv: number): string {
         <div class="card__meta">
           <span class="card__style">{{ beer.style }}</span>
           <span class="card__abv" :class="abvColour(beer.abv)">{{ beer.abv.toFixed(1) }}%</span>
+          <span class="card__serving" :class="beer.servingMethod === 'Cask' ? 'serving--cask' : 'serving--keg'">
+            {{ beer.servingMethod === 'Cask' ? '🪣 Cask' : '🔩 Keg' }}
+          </span>
         </div>
       </div>
     </button>
@@ -179,6 +182,17 @@ function abvColour(abv: number): string {
 .abv--low  { background: #dcfce7; color: #166534; }
 .abv--mid  { background: #dbeafe; color: #1e40af; }
 .abv--high { background: #fee2e2; color: #991b1b; }
+
+.card__serving {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  letter-spacing: 0.01em;
+}
+
+.serving--cask { background: #fef9c3; color: #854d0e; }
+.serving--keg  { background: #f1f5f9; color: #475569; }
 
 .card__description {
   position: relative;
