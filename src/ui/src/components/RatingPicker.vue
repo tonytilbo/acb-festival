@@ -6,6 +6,7 @@ defineProps<{
 
 const emit = defineEmits<{
   rate: [value: number]
+  clear: []
 }>()
 
 const scores = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -31,6 +32,17 @@ function scoreClass(score: number, current: number | null): string {
       @click="emit('rate', score)"
     >
       {{ score }}
+    </button>
+    <button
+      v-if="current !== null"
+      class="pip pip--clear"
+      aria-label="Clear rating"
+      :disabled="submitting"
+      @click="emit('clear')"
+    >
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+        <path d="M2 3h8M5 3V2h2v1M4.5 3l.5 6M7.5 3l-.5 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
     </button>
   </div>
 </template>
@@ -90,5 +102,21 @@ function scoreClass(score: number, current: number | null): string {
   border-color: var(--color-border);
   color: var(--color-text-muted);
   opacity: 0.4;
+}
+
+.pip--clear {
+  flex: none;
+  width: calc(1em / 0.75 * 1.4);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.08);
+  margin-left: 0.1rem;
+}
+
+.pip--clear:hover:not(:disabled) {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.1);
+  transform: scale(1.1);
 }
 </style>
