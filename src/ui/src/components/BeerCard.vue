@@ -62,7 +62,7 @@ async function handleRate(value: number) {
 
       <div class="card__actions">
         <span class="card__serving" :class="beer.servingMethod === 'Cask' ? 'serving--cask' : 'serving--keg'">
-          {{ beer.servingMethod === 'Cask' ? '🪣 Cask' : '🔩 Keg' }}
+          {{ beer.servingMethod }}
         </span>
         <button
           class="card__rate-btn"
@@ -71,10 +71,10 @@ async function handleRate(value: number) {
         >
           <template v-if="isSubmitting()">Saving…</template>
           <template v-else-if="currentRating() !== null">
-            ★ {{ currentRating() }}/10 · {{ pickerOpen ? 'Cancel' : 'Change' }}
+            ★ {{ currentRating() }}/10
           </template>
           <template v-else>
-            {{ pickerOpen ? '✕ Cancel' : '★ Rate this beer' }}
+            {{ pickerOpen ? '✕ Cancel' : '★ Rate' }}
           </template>
         </button>
       </div>
