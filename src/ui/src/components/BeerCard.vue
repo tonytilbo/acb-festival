@@ -20,6 +20,11 @@ function togglePicker() {
 async function handleRate(value: number) {
   await ratingsStore.submitRating(props.beer.id, value)
   pickerOpen.value = false
+}
+
+async function handleClear() {
+  await ratingsStore.clearRating(props.beer.id)
+  pickerOpen.value = false
 }</script>
 
 <template>
@@ -57,6 +62,7 @@ async function handleRate(value: number) {
           :current="currentRating()"
           :submitting="isSubmitting()"
           @rate="handleRate"
+          @clear="handleClear"
         />
       </Transition>
 

@@ -54,6 +54,13 @@ app.MapPost("/api/ratings", (RatingRequest request) =>
 })
 .WithName("SubmitRating");
 
+app.MapDelete("/api/ratings", (string userId, int beerId) =>
+{
+    ratings.TryRemove((userId, beerId), out _);
+    return Results.NoContent();
+})
+.WithName("ClearRating");
+
 app.Run();
 
 record Beer(int Id, string BrewersName, string BeerName, string Style, decimal Abv, string Description, string ServingMethod);

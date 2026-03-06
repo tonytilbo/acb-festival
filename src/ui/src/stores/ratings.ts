@@ -42,6 +42,28 @@ export const useRatingsStore = defineStore('ratings', () => {
     }
   }
 
+  async function clearRating(beerId: number) {
+    if (!userStore.userId) return
+    submitting.value = new Set(submitting.value).add(beerId)
+    error.value = null
+    try {
+      const response = await fetch(
+        `/api/ratings?userId=${userStore.userId}&beerId=${beerId}`,
+        { method: 'DELETE' },
+      )
+      if (!response.ok) throw new Error('Failed to clear rating')
+      const next = { ...ratings.value }
+      delete next[beerId]
+      ratings.value = next
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Something went wrong'
+    } finally {
+      const next = new Set(submitting.value)
+      next.delete(beerId)
+      submitting.value = next
+    }
+  }
+
   function getRating(beerId: number): number | null {
     return ratings.value[beerId] ?? null
   }
@@ -50,5 +72,5 @@ export const useRatingsStore = defineStore('ratings', () => {
     return submitting.value.has(beerId)
   }
 
-  return { fetchRatings, submitRating, getRating, isSubmitting, error }
+  return { fetchRatings, submitRating, clearRating, getRating, isSubmitting, error }
 })
