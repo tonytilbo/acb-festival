@@ -197,9 +197,9 @@ async function handleRate(value: number) {
 }
 
 .card__serving {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.4rem 0.9rem;
   border-radius: 999px;
   letter-spacing: 0.01em;
 }
