@@ -35,7 +35,7 @@ async function handleRate(value: number) {
           <h2 class="card__beer-name">{{ beer.beerName }}</h2>
           <span class="card__abv">{{ beer.abv.toFixed(1) }}%</span>
         </div>
-        <p class="card__sub">{{ beer.style }} · {{ beer.servingMethod }}</p>
+        <p class="card__sub">{{ beer.style }}</p>
         <p class="card__brewery">{{ beer.brewersName }}</p>
       </div>
     </button>
@@ -61,6 +61,9 @@ async function handleRate(value: number) {
       </Transition>
 
       <div class="card__actions">
+        <span class="card__serving" :class="beer.servingMethod === 'Cask' ? 'serving--cask' : 'serving--keg'">
+          {{ beer.servingMethod === 'Cask' ? '🪣 Cask' : '🔩 Keg' }}
+        </span>
         <button
           class="card__rate-btn"
           :class="{ 'card__rate-btn--rated': currentRating() !== null, 'card__rate-btn--open': pickerOpen }"
@@ -189,8 +192,20 @@ async function handleRate(value: number) {
 
 .card__actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
 }
+
+.card__serving {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  letter-spacing: 0.01em;
+}
+
+.serving--cask { background: #fef9c3; color: #854d0e; }
+.serving--keg  { background: #f1f5f9; color: #475569; }
 
 .card__rate-btn {
   background: var(--color-sky);
