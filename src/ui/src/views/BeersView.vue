@@ -72,7 +72,7 @@ onMounted(() => {
 .beers__title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-slate-900);
+  color: var(--color-text);
   line-height: 1.2;
 }
 
@@ -101,7 +101,7 @@ onMounted(() => {
 }
 
 .beers__state--error {
-  color: #dc2626;
+  color: #fca5a5;
 }
 
 .beers__spinner {
@@ -121,8 +121,8 @@ onMounted(() => {
 .beers__retry {
   padding: 0.5rem 1.25rem;
   background: transparent;
-  border: 1px solid #fecaca;
-  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
   border-radius: var(--radius);
   cursor: pointer;
   font-size: 0.875rem;
@@ -130,6 +130,6 @@ onMounted(() => {
 }
 
 .beers__retry:hover {
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.1);
 }
 </style>

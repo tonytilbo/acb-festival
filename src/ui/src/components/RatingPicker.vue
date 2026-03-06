@@ -73,15 +73,15 @@ function scoreClass(score: number, current: number | null): string {
 }
 
 .pip--filled {
-  background: #e0f2fe;
-  border-color: var(--color-sky-light);
-  color: var(--color-sky-dark);
+  background: rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: var(--color-sky);
 }
 
 .pip--selected {
   background: var(--color-sky);
   border-color: var(--color-sky);
-  color: #ffffff;
+  color: #0f172a;
   font-weight: 800;
   transform: scale(1.1);
 }

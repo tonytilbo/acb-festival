@@ -1,23 +1,24 @@
 :root {
-  --color-sky: #0ea5e9;
-  --color-sky-dark: #0284c7;
-  --color-sky-light: #bae6fd;
-  --color-sky-subtle: #f0f9ff;
+  --color-sky: #38bdf8;
+  --color-sky-dark: #0ea5e9;
+  --color-sky-light: #0369a1;
+  --color-sky-subtle: #0c1a2e;
 
-  --color-slate-50: #f8fafc;
+  --color-slate-50:  #f8fafc;
   --color-slate-100: #f1f5f9;
   --color-slate-200: #e2e8f0;
   --color-slate-300: #cbd5e1;
   --color-slate-500: #64748b;
   --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
   --color-slate-900: #0f172a;
 
-  --color-text: var(--color-slate-900);
-  --color-text-muted: var(--color-slate-500);
-  --color-background: var(--color-slate-50);
-  --color-surface: #ffffff;
-  --color-border: var(--color-slate-200);
-  --color-border-hover: var(--color-slate-300);
+  --color-text:         #f1f5f9;
+  --color-text-muted:   #94a3b8;
+  --color-background:   #0f172a;
+  --color-surface:      #1e293b;
+  --color-border:       #334155;
+  --color-border-hover: #475569;
 
   --radius: 12px;
   --radius-lg: 20px;

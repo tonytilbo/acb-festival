@@ -50,7 +50,7 @@ async function enter() {
   justify-content: center;
   min-height: 100dvh;
   padding: 2rem 1.25rem;
-  background: linear-gradient(160deg, #e0f2fe 0%, #f8fafc 50%, #f0f9ff 100%);
+  background: linear-gradient(160deg, #0c1a2e 0%, #0f172a 50%, #0c1a2e 100%);
 }
 
 .welcome__content {
@@ -66,14 +66,14 @@ async function enter() {
 .welcome__badge {
   font-size: 4rem;
   line-height: 1;
-  filter: drop-shadow(0 4px 12px rgba(14, 165, 233, 0.3));
+  filter: drop-shadow(0 4px 16px rgba(56, 189, 248, 0.4));
 }
 
 .welcome__title {
   font-size: 2.25rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--color-slate-900);
+  color: var(--color-text);
   line-height: 1.1;
 }
 
@@ -99,9 +99,9 @@ async function enter() {
 
 .welcome__error {
   font-size: 0.875rem;
-  color: #dc2626;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: var(--radius);
   padding: 0.75rem 1rem;
   width: 100%;
@@ -120,7 +120,7 @@ async function enter() {
   cursor: pointer;
   transition: background 0.2s, transform 0.1s, opacity 0.2s;
   letter-spacing: 0.01em;
-  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
 }
 
 .welcome__cta:hover:not(:disabled) {

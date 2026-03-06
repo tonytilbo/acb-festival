@@ -127,7 +127,7 @@ async function handleRate(value: number) {
 .card__beer-name {
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--color-slate-900);
+  color: var(--color-text);
   line-height: 1.3;
 }
 
@@ -146,7 +146,7 @@ async function handleRate(value: number) {
 
 .card__brewery {
   font-size: 0.75rem;
-  color: var(--color-slate-300);
+  color: var(--color-border-hover);
   margin-top: 0.1rem;
   white-space: nowrap;
   overflow: hidden;
@@ -204,8 +204,8 @@ async function handleRate(value: number) {
   letter-spacing: 0.01em;
 }
 
-.serving--cask { background: #fef9c3; color: #854d0e; }
-.serving--keg  { background: #f1f5f9; color: #475569; }
+.serving--cask { background: rgba(234, 179, 8, 0.15);  color: #fde047; }
+.serving--keg  { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
 
 .card__rate-btn {
   background: var(--color-sky);
@@ -229,19 +229,19 @@ async function handleRate(value: number) {
 }
 
 .card__rate-btn--rated {
-  background: #f0f9ff;
-  color: var(--color-sky-dark);
-  border: 1px solid var(--color-sky-light);
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--color-sky);
+  border: 1px solid rgba(56, 189, 248, 0.3);
 }
 
 .card__rate-btn--rated:hover {
-  background: #e0f2fe;
+  background: rgba(56, 189, 248, 0.2);
 }
 
 .card__rate-btn--open {
-  background: var(--color-slate-100);
+  background: var(--color-border);
   color: var(--color-text-muted);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-hover);
 }
 
 /* Slide transition for the rating picker */
