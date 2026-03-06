@@ -20,14 +20,7 @@ function togglePicker() {
 async function handleRate(value: number) {
   await ratingsStore.submitRating(props.beer.id, value)
   pickerOpen.value = false
-}
-
-function abvColour(abv: number): string {
-  if (abv < 4.0) return 'abv--low'
-  if (abv < 6.0) return 'abv--mid'
-  return 'abv--high'
-}
-</script>
+}</script>
 
 <template>
   <article class="card">
@@ -38,17 +31,12 @@ function abvColour(abv: number): string {
       @click="descriptionOpen = !descriptionOpen"
     >
       <div class="card__names">
-        <h2 class="card__beer-name">{{ beer.beerName }}</h2>
-        <p class="card__style">{{ beer.style }}</p>
-        <p class="card__brewery">{{ beer.brewersName }}</p>
-      </div>
-      <div class="card__right">
-        <div class="card__meta">
-          <span class="card__abv" :class="abvColour(beer.abv)">{{ beer.abv.toFixed(1) }}%</span>
-          <span class="card__serving" :class="beer.servingMethod === 'Cask' ? 'serving--cask' : 'serving--keg'">
-            {{ beer.servingMethod === 'Cask' ? '🪣 Cask' : '🔩 Keg' }}
-          </span>
+        <div class="card__title-row">
+          <h2 class="card__beer-name">{{ beer.beerName }}</h2>
+          <span class="card__abv">{{ beer.abv.toFixed(1) }}%</span>
         </div>
+        <p class="card__sub">{{ beer.style }} · {{ beer.servingMethod }}</p>
+        <p class="card__brewery">{{ beer.brewersName }}</p>
       </div>
     </button>
 
@@ -99,7 +87,7 @@ function abvColour(abv: number): string {
   padding: 1rem 1.125rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.6rem;
   transition: border-color 0.2s, box-shadow 0.2s;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
@@ -111,9 +99,6 @@ function abvColour(abv: number): string {
 
 .card__top {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 0.75rem;
   background: none;
   border: none;
   padding: 0;
@@ -129,6 +114,13 @@ function abvColour(abv: number): string {
   min-width: 0;
 }
 
+.card__title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
 .card__beer-name {
   font-size: 1.05rem;
   font-weight: 700;
@@ -136,59 +128,27 @@ function abvColour(abv: number): string {
   line-height: 1.3;
 }
 
-.card__brewery {
-  font-size: 0.8rem;
+.card__abv {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.card__sub {
+  font-size: 0.78rem;
   color: var(--color-text-muted);
   margin-top: 0.15rem;
+}
+
+.card__brewery {
+  font-size: 0.75rem;
+  color: var(--color-slate-300);
+  margin-top: 0.1rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-.card__right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.4rem;
-  flex-shrink: 0;
-}
-
-.card__meta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.35rem;
-}
-
-.card__style {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-  margin-top: 0.1rem;
-  margin-bottom: 0.1rem;
-}
-
-.card__abv {
-  font-size: 0.8rem;
-  font-weight: 700;
-  padding: 0.2rem 0.5rem;
-  border-radius: 999px;
-  letter-spacing: 0.02em;
-}
-
-.abv--low  { background: #dcfce7; color: #166534; }
-.abv--mid  { background: #dbeafe; color: #1e40af; }
-.abv--high { background: #fee2e2; color: #991b1b; }
-
-.card__serving {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.2rem 0.5rem;
-  border-radius: 999px;
-  letter-spacing: 0.01em;
-}
-
-.serving--cask { background: #fef9c3; color: #854d0e; }
-.serving--keg  { background: #f1f5f9; color: #475569; }
 
 .card__description {
   position: relative;
@@ -224,8 +184,7 @@ function abvColour(abv: number): string {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  border-top: 1px solid var(--color-border);
-  padding-top: 0.75rem;
+  padding-top: 0.25rem;
 }
 
 .card__actions {
