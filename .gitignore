@@ -1,0 +1,12 @@
+# Node
+src/ui/node_modules/
+src/ui/dist/
+
+# .NET
+src/api/bin/
+src/api/obj/
+
+# Misc
+.DS_Store
+*.user
+.claude/
