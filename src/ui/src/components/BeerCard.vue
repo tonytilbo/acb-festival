@@ -28,7 +28,7 @@ async function handleClear() {
 }</script>
 
 <template>
-  <article class="card">
+  <article class="card" :class="{ 'card--tasted': currentRating() !== null }">
     <button
       class="card__top"
       :aria-expanded="descriptionOpen"
@@ -104,6 +104,15 @@ async function handleClear() {
 .card:hover {
   border-color: var(--color-border-hover);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card--tasted {
+  filter: saturate(0.6) brightness(0.88);
+  transition: filter 0.3s ease;
+}
+
+.card--tasted:hover {
+  filter: saturate(0.8) brightness(0.95);
 }
 
 .card__top {
