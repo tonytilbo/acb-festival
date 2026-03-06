@@ -8,7 +8,12 @@ export function useScrollFade(target: Ref<HTMLElement | null>) {
     if (!target.value) return
 
     observer = new IntersectionObserver(
-      ([entry]) => { isVisible.value = entry.isIntersecting },
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          isVisible.value = true
+          observer?.disconnect()
+        }
+      },
       { threshold: 0.12 },
     )
 

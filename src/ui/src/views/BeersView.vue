@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useBeersStore } from '@/stores/beers'
 import { useRatingsStore } from '@/stores/ratings'
 import BeerCard from '@/components/BeerCard.vue'
@@ -7,6 +7,10 @@ import ScrollFadeItem from '@/components/ScrollFadeItem.vue'
 
 const beersStore = useBeersStore()
 const ratingsStore = useRatingsStore()
+
+const remaining = computed(() =>
+  beersStore.beers.filter(b => ratingsStore.getRating(b.id) === null).length
+)
 
 onMounted(() => {
   beersStore.fetchBeers()
@@ -21,7 +25,8 @@ onMounted(() => {
       <div>
         <h1 class="beers__title">ACB Beer Festival</h1>
         <p v-if="!beersStore.isLoading && beersStore.beers.length" class="beers__count">
-          {{ beersStore.beers.length }} beers on offer
+          <template v-if="remaining === 0">All beers tasted!</template>
+          <template v-else>{{ remaining }} of {{ beersStore.beers.length }} left to try</template>
         </p>
       </div>
     </header>
