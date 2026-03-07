@@ -29,7 +29,8 @@ output "managed_identity_client_id" {
   value       = azurerm_user_assigned_identity.api.client_id
 }
 
-output "custom_domain_validation_token" {
-  description = "CNAME validation token — add as a CNAME record at your DNS provider"
-  value       = azurerm_static_web_app_custom_domain.main.validation_token
-}
+#output "custom_domain_validation_token" {
+#  description = "CNAME validation token — add as a CNAME record at your DNS provider"
+#  value       = azurerm_static_web_app_custom_domain.main.validation_token
+#  sensitive   = true
+#}

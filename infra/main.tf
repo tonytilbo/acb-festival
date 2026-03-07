@@ -166,8 +166,8 @@ resource "azurerm_static_web_app" "frontend" {
   sku_size            = "Standard"
 }
 
-resource "azurerm_static_web_app_custom_domain" "main" {
-  static_web_app_id = azurerm_static_web_app.frontend.id
-  domain_name       = var.custom_domain
-  validation_type   = "cname-delegation"
-}
+#resource "azurerm_static_web_app_custom_domain" "main" {
+#  static_web_app_id = azurerm_static_web_app.frontend.id
+#  domain_name       = var.custom_domain
+#  validation_type   = "cname-delegation"
+#}
