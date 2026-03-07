@@ -10,7 +10,7 @@ on:
 
 env:
   REGISTRY: ${{ secrets.ACR_LOGIN_SERVER }}
-  IMAGE_NAME: acb-festival-api
+  IMAGE_NAME: acb-festival2026-api
 
 jobs:
   build-and-deploy:
@@ -38,6 +38,6 @@ jobs:
       - name: Deploy to Container Apps
         run: |
           az containerapp update \
-            --name acb-festival-api \
-            --resource-group acb-festival \
+            --name acb-festival2026-api \
+            --resource-group acb-festival2026 \
             --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
