@@ -1,20 +1,19 @@
 <script setup lang="ts">
 defineProps<{
-  current: number | null
+  selected: number | null
   submitting: boolean
 }>()
 
 const emit = defineEmits<{
-  rate: [value: number]
-  clear: []
+  select: [value: number]
 }>()
 
 const scores = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-function scoreClass(score: number, current: number | null): string {
-  if (current === null) return 'pip'
-  if (score === current) return 'pip pip--selected'
-  if (score < current) return 'pip pip--filled'
+function scoreClass(score: number, selected: number | null): string {
+  if (selected === null) return 'pip'
+  if (score === selected) return 'pip pip--selected'
+  if (score < selected) return 'pip pip--filled'
   return 'pip pip--empty'
 }
 </script>
@@ -25,24 +24,14 @@ function scoreClass(score: number, current: number | null): string {
       v-for="score in scores"
       :key="score"
       class="pip"
-      :class="scoreClass(score, current)"
+      :class="scoreClass(score, selected)"
       :aria-label="`Rate ${score} out of 10`"
-      :aria-pressed="current === score"
+      :aria-pressed="selected === score"
       :disabled="submitting"
-      @click="emit('rate', score)"
+      type="button"
+      @click="emit('select', score)"
     >
       {{ score }}
-    </button>
-    <button
-      v-if="current !== null"
-      class="pip pip--clear"
-      aria-label="Clear rating"
-      :disabled="submitting"
-      @click="emit('clear')"
-    >
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-        <path d="M2 3h8M5 3V2h2v1M4.5 3l.5 6M7.5 3l-.5 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-      </svg>
     </button>
   </div>
 </template>

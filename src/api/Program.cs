@@ -54,11 +54,11 @@ app.MapGet("/api/beers", () => Results.Ok(BeerData.All))
 
 app.MapGet("/api/ratings", async (string userId, TableClient table) =>
 {
-    var userRatings = new Dictionary<int, int>();
+    var userRatings = new Dictionary<int, object>();
     await foreach (var entity in table.QueryAsync<RatingEntity>(e => e.PartitionKey == userId))
     {
         if (int.TryParse(entity.RowKey, out var beerId))
-            userRatings[beerId] = entity.Rating;
+            userRatings[beerId] = new { entity.Rating, entity.Notes };
     }
     return Results.Ok(userRatings);
 })
@@ -74,9 +74,10 @@ app.MapPost("/api/ratings", async (RatingRequest request, TableClient table) =>
         PartitionKey = request.UserId,
         RowKey       = request.BeerId.ToString(),
         Rating       = request.Rating,
+        Notes        = request.Notes,
     };
     await table.UpsertEntityAsync(entity);
-    return Results.Ok(new { request.UserId, request.BeerId, request.Rating });
+    return Results.Ok(new { request.UserId, request.BeerId, request.Rating, request.Notes });
 })
 .WithName("SubmitRating");
 
@@ -91,13 +92,14 @@ app.Run();
 
 record Beer(int Id, string BrewersName, string BeerName, string Style, decimal Abv, string Description, string ServingMethod);
 
-record RatingRequest(string UserId, int BeerId, int Rating);
+record RatingRequest(string UserId, int BeerId, int Rating, string? Notes);
 
 class RatingEntity : ITableEntity
 {
     public string PartitionKey { get; set; } = string.Empty; // userId
     public string RowKey       { get; set; } = string.Empty; // beerId
     public int    Rating       { get; set; }
+    public string? Notes       { get; set; }
     public DateTimeOffset? Timestamp { get; set; }
     public Azure.ETag ETag { get; set; }
 }

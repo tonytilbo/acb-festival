@@ -3,8 +3,8 @@ import { defineStore } from 'pinia'
 import { useUserStore } from './user'
 
 export const useRatingsStore = defineStore('ratings', () => {
-  // beerId -> rating
-  const ratings = ref<Record<number, number>>({})
+  // beerId -> { rating, notes }
+  const ratings = ref<Record<number, { rating: number; notes: string | null }>>({})
   const submitting = ref<Set<number>>(new Set())
   const error = ref<string | null>(null)
 
@@ -21,7 +21,7 @@ export const useRatingsStore = defineStore('ratings', () => {
     }
   }
 
-  async function submitRating(beerId: number, rating: number) {
+  async function submitRating(beerId: number, rating: number, notes: string | null = null) {
     if (!userStore.userId) return
     submitting.value = new Set(submitting.value).add(beerId)
     error.value = null
@@ -29,10 +29,10 @@ export const useRatingsStore = defineStore('ratings', () => {
       const response = await fetch('/api/ratings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: userStore.userId, beerId, rating }),
+        body: JSON.stringify({ userId: userStore.userId, beerId, rating, notes }),
       })
       if (!response.ok) throw new Error('Failed to submit rating')
-      ratings.value = { ...ratings.value, [beerId]: rating }
+      ratings.value = { ...ratings.value, [beerId]: { rating, notes } }
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Something went wrong'
     } finally {
@@ -65,12 +65,16 @@ export const useRatingsStore = defineStore('ratings', () => {
   }
 
   function getRating(beerId: number): number | null {
-    return ratings.value[beerId] ?? null
+    return ratings.value[beerId]?.rating ?? null
+  }
+
+  function getNotes(beerId: number): string | null {
+    return ratings.value[beerId]?.notes ?? null
   }
 
   function isSubmitting(beerId: number): boolean {
     return submitting.value.has(beerId)
   }
 
-  return { fetchRatings, submitRating, clearRating, getRating, isSubmitting, error }
+  return { fetchRatings, submitRating, clearRating, getRating, getNotes, isSubmitting, error }
 })
