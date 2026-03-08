@@ -13,6 +13,7 @@ const pendingRating = ref<number | null>(null)
 const notes = ref('')
 
 const currentRating = () => ratingsStore.getRating(props.beer.id)
+const currentNotes = () => ratingsStore.getNotes(props.beer.id)
 const isSubmitting = () => ratingsStore.isSubmitting(props.beer.id)
 
 function openPicker() {
