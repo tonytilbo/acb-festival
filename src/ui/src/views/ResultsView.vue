@@ -8,10 +8,18 @@ interface BeerResult {
   count: number
 }
 
+interface BeerRating {
+  rating: number
+  notes: string | null
+}
+
 const beersStore = useBeersStore()
 const results = ref<BeerResult[]>([])
 const isLoading = ref(true)
 const error = ref<string | null>(null)
+const expandedBeerId = ref<number | null>(null)
+const beerRatings = ref<Record<number, BeerRating[]>>({})
+const loadingRatings = ref<Set<number>>(new Set())
 
 onMounted(async () => {
   await beersStore.fetchBeers()
@@ -25,6 +33,28 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
+
+async function toggleBeer(beerId: number) {
+  if (expandedBeerId.value === beerId) {
+    expandedBeerId.value = null
+    return
+  }
+
+  expandedBeerId.value = beerId
+
+  if (beerRatings.value[beerId]) return
+
+  loadingRatings.value = new Set(loadingRatings.value).add(beerId)
+  try {
+    const response = await fetch(`/api/results/${beerId}`)
+    if (!response.ok) throw new Error('Failed to load ratings')
+    beerRatings.value = { ...beerRatings.value, [beerId]: await response.json() }
+  } finally {
+    const next = new Set(loadingRatings.value)
+    next.delete(beerId)
+    loadingRatings.value = next
+  }
+}
 
 function beerName(beerId: number): string {
   return beersStore.beers.find(b => b.id === beerId)?.beerName ?? '—'
@@ -59,15 +89,48 @@ function brewerName(beerId: number): string {
 
     <ol v-else class="results__list">
       <li v-for="(result, index) in results" :key="result.beerId" class="results__item">
-        <span class="results__rank">{{ index + 1 }}</span>
-        <div class="results__beer">
-          <span class="results__beer-name">{{ beerName(result.beerId) }}</span>
-          <span class="results__brewer">{{ brewerName(result.beerId) }}</span>
-        </div>
-        <div class="results__score">
-          <span class="results__average">{{ result.average.toFixed(1) }}</span>
-          <span class="results__count">{{ result.count }} {{ result.count === 1 ? 'rating' : 'ratings' }}</span>
-        </div>
+        <button
+          class="results__row"
+          :class="{ 'results__row--open': expandedBeerId === result.beerId }"
+          :aria-expanded="expandedBeerId === result.beerId"
+          @click="toggleBeer(result.beerId)"
+        >
+          <span class="results__rank">{{ index + 1 }}</span>
+          <div class="results__beer">
+            <span class="results__beer-name">{{ beerName(result.beerId) }}</span>
+            <span class="results__brewer">{{ brewerName(result.beerId) }}</span>
+          </div>
+          <div class="results__score">
+            <span class="results__average">{{ result.average.toFixed(1) }}</span>
+            <span class="results__count">{{ result.count }} {{ result.count === 1 ? 'rating' : 'ratings' }}</span>
+          </div>
+          <svg
+            class="results__chevron"
+            width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"
+            :class="{ 'results__chevron--open': expandedBeerId === result.beerId }"
+          >
+            <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <Transition name="expand">
+          <div v-if="expandedBeerId === result.beerId" class="results__breakdown">
+            <div v-if="loadingRatings.has(result.beerId)" class="results__breakdown-loading">
+              <span class="results__spinner results__spinner--sm" aria-hidden="true" />
+            </div>
+            <ul v-else-if="beerRatings[result.beerId]" class="results__ratings">
+              <li
+                v-for="(r, i) in beerRatings[result.beerId]"
+                :key="i"
+                class="results__rating-row"
+              >
+                <span class="results__rating-score">{{ r.rating }}/10</span>
+                <span v-if="r.notes" class="results__rating-notes">{{ r.notes }}</span>
+                <span v-else class="results__rating-notes results__rating-notes--empty">No notes</span>
+              </li>
+            </ul>
+          </div>
+        </Transition>
       </li>
     </ol>
   </div>
@@ -127,6 +190,12 @@ function brewerName(beerId: number): string {
   animation: spin 0.8s linear infinite;
 }
 
+.results__spinner--sm {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-width: 2px;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -140,13 +209,32 @@ function brewerName(beerId: number): string {
 }
 
 .results__item {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.results__item:has(.results__row--open) {
+  border-color: var(--color-border-hover);
+}
+
+.results__row {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
   padding: 0.75rem 1rem;
+  width: 100%;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.results__row:hover {
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .results__rank {
@@ -155,6 +243,7 @@ function brewerName(beerId: number): string {
   color: var(--color-text-muted);
   min-width: 1.25rem;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .results__item:nth-child(1) .results__rank { color: #fde047; }
@@ -203,5 +292,75 @@ function brewerName(beerId: number): string {
 .results__count {
   font-size: 0.7rem;
   color: var(--color-text-muted);
+}
+
+.results__chevron {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.results__chevron--open {
+  transform: rotate(180deg);
+}
+
+/* Breakdown panel */
+
+.results__breakdown {
+  border-top: 1px solid var(--color-border);
+  padding: 0.5rem 0;
+}
+
+.results__breakdown-loading {
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem;
+}
+
+.results__ratings {
+  list-style: none;
+  padding: 0;
+}
+
+.results__rating-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.4rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.results__rating-row:last-child {
+  border-bottom: none;
+}
+
+.results__rating-score {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-sky);
+  flex-shrink: 0;
+  min-width: 2.5rem;
+}
+
+.results__rating-notes {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.results__rating-notes--empty {
+  font-style: italic;
+  opacity: 0.5;
+}
+
+/* Expand transition */
+.expand-enter-active,
+.expand-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.expand-enter-from,
+.expand-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 </style>

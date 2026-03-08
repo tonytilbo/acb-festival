@@ -115,6 +115,22 @@ app.MapGet("/api/results", async (TableClient table) =>
 })
 .WithName("GetResults");
 
+app.MapGet("/api/results/{beerId}", async (int beerId, TableClient table) =>
+{
+    var ratings = new List<(int Rating, string? Notes)>();
+    await foreach (var entity in table.QueryAsync<RatingEntity>(e => e.RowKey == beerId.ToString()))
+    {
+        ratings.Add((entity.Rating, entity.Notes));
+    }
+
+    var sorted = ratings
+        .OrderByDescending(r => r.Rating)
+        .Select(r => new { r.Rating, r.Notes });
+
+    return Results.Ok(sorted);
+})
+.WithName("GetBeerRatings");
+
 app.Run();
 
 record Beer(int Id, string BrewersName, string BeerName, string Style, decimal Abv, string Description, string ServingMethod);
