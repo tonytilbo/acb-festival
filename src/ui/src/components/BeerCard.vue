@@ -9,21 +9,42 @@ const props = defineProps<{ beer: Beer }>()
 const ratingsStore = useRatingsStore()
 const pickerOpen = ref(false)
 const descriptionOpen = ref(false)
+const pendingRating = ref<number | null>(null)
+const notes = ref('')
 
 const currentRating = () => ratingsStore.getRating(props.beer.id)
+const currentNotes = () => ratingsStore.getNotes(props.beer.id)
 const isSubmitting = () => ratingsStore.isSubmitting(props.beer.id)
 
-function togglePicker() {
-  pickerOpen.value = !pickerOpen.value
+function openPicker() {
+  if (pickerOpen.value) return
+  pendingRating.value = currentRating()
+  notes.value = currentNotes() ?? ''
+  pickerOpen.value = true
 }
 
-async function handleRate(value: number) {
-  await ratingsStore.submitRating(props.beer.id, value)
+function handleSelect(value: number) {
+  pendingRating.value = value
+}
+
+function handleCancel() {
+  pendingRating.value = null
+  notes.value = ''
+  pickerOpen.value = false
+}
+
+async function handleSave() {
+  if (pendingRating.value === null) return
+  await ratingsStore.submitRating(props.beer.id, pendingRating.value, notes.value.trim() || null)
+  pendingRating.value = null
+  notes.value = ''
   pickerOpen.value = false
 }
 
 async function handleClear() {
   await ratingsStore.clearRating(props.beer.id)
+  pendingRating.value = null
+  notes.value = ''
   pickerOpen.value = false
 }</script>
 
@@ -46,6 +67,7 @@ async function handleClear() {
     </button>
 
     <div
+      v-if="!pickerOpen"
       :id="`desc-${beer.id}`"
       class="card__description"
       :class="{ 'card__description--open': descriptionOpen }"
@@ -57,31 +79,60 @@ async function handleClear() {
 
     <div class="card__footer">
       <Transition name="slide">
-        <RatingPicker
-          v-if="pickerOpen"
-          :current="currentRating()"
-          :submitting="isSubmitting()"
-          @rate="handleRate"
-          @clear="handleClear"
-        />
+        <div v-if="pickerOpen" class="card__picker-wrap" @click.stop>
+          <RatingPicker
+            :selected="pendingRating"
+            :submitting="isSubmitting()"
+            @select="handleSelect"
+          />
+          <textarea
+            v-model="notes"
+            class="card__notes-input"
+            placeholder="Tasting notes (optional)"
+            rows="2"
+            maxlength="500"
+          />
+          <div class="card__picker-actions">
+            <button
+              v-if="currentRating() !== null"
+              type="button"
+              class="card__action-btn card__action-btn--clear"
+              :disabled="isSubmitting()"
+              @click="handleClear"
+            >
+              Clear
+            </button>
+            <button type="button" class="card__action-btn card__action-btn--cancel" @click="handleCancel">Cancel</button>
+            <button
+              type="button"
+              class="card__action-btn card__action-btn--save"
+              :disabled="pendingRating === null || isSubmitting()"
+              @click="handleSave"
+            >
+              {{ isSubmitting() ? 'Saving…' : 'Save' }}
+            </button>
+          </div>
+        </div>
       </Transition>
 
-      <div class="card__actions">
+      <p v-if="currentNotes() && !pickerOpen" class="card__notes-display">{{ currentNotes() }}</p>
+
+      <div v-if="!pickerOpen" class="card__actions">
         <span class="card__serving" :class="beer.servingMethod === 'Cask' ? 'serving--cask' : 'serving--keg'">
           {{ beer.servingMethod }}
         </span>
         <button
           class="card__rate-btn"
-          :class="{ 'card__rate-btn--rated': currentRating() !== null, 'card__rate-btn--open': pickerOpen }"
-          @click="togglePicker"
+          :class="{ 'card__rate-btn--rated': currentRating() !== null }"
+          @click="openPicker"
         >
-          <template v-if="isSubmitting()">Saving…</template>
-          <template v-else-if="currentRating() !== null">
+          <template v-if="currentRating() !== null">
             ★ {{ currentRating() }}/10
+            <svg class="card__edit-icon" width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+              <path d="M7.5 1.5l2 2L3 10H1V8L7.5 1.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </template>
-          <template v-else>
-            {{ pickerOpen ? '✕ Cancel' : '★ Rate' }}
-          </template>
+          <template v-else>★ Rate</template>
         </button>
       </div>
     </div>
@@ -247,16 +298,101 @@ async function handleClear() {
   background: rgba(56, 189, 248, 0.1);
   color: var(--color-sky);
   border: 1px solid rgba(56, 189, 248, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.card__edit-icon {
+  opacity: 0.7;
+  flex-shrink: 0;
 }
 
 .card__rate-btn--rated:hover {
   background: rgba(56, 189, 248, 0.2);
 }
 
-.card__rate-btn--open {
-  background: var(--color-border);
+.card__picker-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.card__notes-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-size: 0.8rem;
+  padding: 0.5rem 0.75rem;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+}
+
+.card__notes-input:focus {
+  border-color: var(--color-sky);
+}
+
+.card__picker-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.card__action-btn {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  font-family: inherit;
+}
+
+.card__action-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.card__action-btn--cancel {
+  margin-left: auto;
+  background: transparent;
+  border-color: var(--color-border);
   color: var(--color-text-muted);
-  border: 1px solid var(--color-border-hover);
+}
+
+.card__action-btn--cancel:hover {
+  background: var(--color-border);
+}
+
+.card__action-btn--save {
+  background: var(--color-sky);
+  color: #ffffff;
+}
+
+.card__action-btn--save:not(:disabled):hover {
+  background: var(--color-sky-dark);
+}
+
+.card__action-btn--clear {
+  background: transparent;
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+
+.card__action-btn--clear:hover {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.card__notes-display {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin: 0;
 }
 
 /* Slide transition for the rating picker */
