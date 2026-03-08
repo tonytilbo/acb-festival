@@ -95,7 +95,12 @@ function brewerName(beerId: number): string {
           :aria-expanded="expandedBeerId === result.beerId"
           @click="toggleBeer(result.beerId)"
         >
-          <span class="results__rank">{{ index + 1 }}</span>
+          <span class="results__rank" aria-label="`Rank ${index + 1}`">
+            <template v-if="index === 0">🥇</template>
+            <template v-else-if="index === 1">🥈</template>
+            <template v-else-if="index === 2">🥉</template>
+            <template v-else>{{ index + 1 }}</template>
+          </span>
           <div class="results__beer">
             <span class="results__beer-name">{{ beerName(result.beerId) }}</span>
             <span class="results__brewer">{{ brewerName(result.beerId) }}</span>
@@ -246,9 +251,7 @@ function brewerName(beerId: number): string {
   flex-shrink: 0;
 }
 
-.results__item:nth-child(1) .results__rank { color: #fde047; }
-.results__item:nth-child(2) .results__rank { color: #94a3b8; }
-.results__item:nth-child(3) .results__rank { color: #fb923c; }
+.results__item:nth-child(-n+3) .results__rank { font-size: 1rem; }
 
 .results__beer {
   flex: 1;
