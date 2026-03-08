@@ -66,19 +66,41 @@ async function handleClear() {
       </div>
     </button>
 
-    <div
-      v-if="!pickerOpen"
-      :id="`desc-${beer.id}`"
-      class="card__description"
-      :class="{ 'card__description--open': descriptionOpen }"
-      @click="descriptionOpen = !descriptionOpen"
-    >
-      <p>{{ beer.description }}</p>
-      <div class="card__description-fade" aria-hidden="true" />
-    </div>
+    <div class="card__body">
+      <Transition name="crossfade">
+        <div v-if="!pickerOpen" class="card__info-view">
+          <div
+            :id="`desc-${beer.id}`"
+            class="card__description"
+            :class="{ 'card__description--open': descriptionOpen }"
+            @click="descriptionOpen = !descriptionOpen"
+          >
+            <p>{{ beer.description }}</p>
+            <div class="card__description-fade" aria-hidden="true" />
+          </div>
+          <p v-if="currentNotes()" class="card__notes-display">{{ currentNotes() }}</p>
+          <div class="card__actions">
+            <span class="card__serving" :class="beer.servingMethod === 'Cask' ? 'serving--cask' : 'serving--keg'">
+              {{ beer.servingMethod }}
+            </span>
+            <button
+              class="card__rate-btn"
+              :class="{ 'card__rate-btn--rated': currentRating() !== null }"
+              @click="openPicker"
+            >
+              <template v-if="currentRating() !== null">
+                ★ {{ currentRating() }}/10
+                <svg class="card__edit-icon" width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+                  <path d="M7.5 1.5l2 2L3 10H1V8L7.5 1.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </template>
+              <template v-else>★ Rate</template>
+            </button>
+          </div>
+        </div>
+      </Transition>
 
-    <div class="card__footer">
-      <Transition name="slide">
+      <Transition name="crossfade">
         <div v-if="pickerOpen" class="card__picker-wrap" @click.stop>
           <RatingPicker
             :selected="pendingRating"
@@ -114,27 +136,6 @@ async function handleClear() {
           </div>
         </div>
       </Transition>
-
-      <p v-if="currentNotes() && !pickerOpen" class="card__notes-display">{{ currentNotes() }}</p>
-
-      <div v-if="!pickerOpen" class="card__actions">
-        <span class="card__serving" :class="beer.servingMethod === 'Cask' ? 'serving--cask' : 'serving--keg'">
-          {{ beer.servingMethod }}
-        </span>
-        <button
-          class="card__rate-btn"
-          :class="{ 'card__rate-btn--rated': currentRating() !== null }"
-          @click="openPicker"
-        >
-          <template v-if="currentRating() !== null">
-            ★ {{ currentRating() }}/10
-            <svg class="card__edit-icon" width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-              <path d="M7.5 1.5l2 2L3 10H1V8L7.5 1.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </template>
-          <template v-else>★ Rate</template>
-        </button>
-      </div>
     </div>
   </article>
 </template>
@@ -249,11 +250,21 @@ async function handleClear() {
   opacity: 0;
 }
 
-.card__footer {
+.card__body {
+  position: relative;
+  padding-top: 0.25rem;
+}
+
+.card__info-view {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  padding-top: 0.25rem;
+}
+
+.card__picker-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .card__actions {
@@ -310,12 +321,6 @@ async function handleClear() {
 
 .card__rate-btn--rated:hover {
   background: rgba(56, 189, 248, 0.2);
-}
-
-.card__picker-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
 }
 
 .card__notes-input {
@@ -395,14 +400,21 @@ async function handleClear() {
   margin: 0;
 }
 
-/* Slide transition for the rating picker */
-.slide-enter-active,
-.slide-leave-active {
-  transition: opacity 0.2s, transform 0.2s;
+/* Crossfade between info view and picker */
+.crossfade-leave-active {
+  transition: opacity 0.15s ease;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
 }
-.slide-enter-from,
-.slide-leave-to {
+
+.crossfade-enter-active {
+  transition: opacity 0.2s ease 0.1s;
+}
+
+.crossfade-enter-from,
+.crossfade-leave-to {
   opacity: 0;
-  transform: translateY(-4px);
 }
 </style>
