@@ -13,7 +13,6 @@ const pendingRating = ref<number | null>(null)
 const notes = ref('')
 
 const currentRating = () => ratingsStore.getRating(props.beer.id)
-const currentNotes = () => ratingsStore.getNotes(props.beer.id)
 const isSubmitting = () => ratingsStore.isSubmitting(props.beer.id)
 
 function openPicker() {
@@ -78,7 +77,6 @@ async function handleClear() {
             <p>{{ beer.description }}</p>
             <div class="card__description-fade" aria-hidden="true" />
           </div>
-          <p v-if="currentNotes()" class="card__notes-display">{{ currentNotes() }}</p>
           <div class="card__actions">
             <span class="card__serving" :class="beer.servingMethod === 'Cask' ? 'serving--cask' : 'serving--keg'">
               {{ beer.servingMethod }}
@@ -393,12 +391,6 @@ async function handleClear() {
   background: rgba(239, 68, 68, 0.08);
 }
 
-.card__notes-display {
-  font-size: 0.78rem;
-  color: var(--color-text-muted);
-  font-style: italic;
-  margin: 0;
-}
 
 /* Crossfade between info view and picker */
 .crossfade-leave-active {
