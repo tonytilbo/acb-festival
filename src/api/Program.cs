@@ -88,6 +88,33 @@ app.MapDelete("/api/ratings", async (string userId, int beerId, TableClient tabl
 })
 .WithName("ClearRating");
 
+app.MapGet("/api/results", async (TableClient table) =>
+{
+    var grouped = new Dictionary<int, List<int>>();
+    await foreach (var entity in table.QueryAsync<RatingEntity>())
+    {
+        if (int.TryParse(entity.RowKey, out var beerId))
+        {
+            if (!grouped.ContainsKey(beerId))
+                grouped[beerId] = [];
+            grouped[beerId].Add(entity.Rating);
+        }
+    }
+
+    var results = grouped
+        .Select(kvp => new
+        {
+            BeerId  = kvp.Key,
+            Average = Math.Round(kvp.Value.Average(), 1),
+            Count   = kvp.Value.Count,
+        })
+        .OrderByDescending(r => r.Average)
+        .ThenByDescending(r => r.Count);
+
+    return Results.Ok(results);
+})
+.WithName("GetResults");
+
 app.Run();
 
 record Beer(int Id, string BrewersName, string BeerName, string Style, decimal Abv, string Description, string ServingMethod);

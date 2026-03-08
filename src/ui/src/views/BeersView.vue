@@ -4,6 +4,7 @@ import { useBeersStore } from '@/stores/beers'
 import { useRatingsStore } from '@/stores/ratings'
 import BeerCard from '@/components/BeerCard.vue'
 import ScrollFadeItem from '@/components/ScrollFadeItem.vue'
+import { RouterLink } from 'vue-router'
 
 const beersStore = useBeersStore()
 const ratingsStore = useRatingsStore()
@@ -22,13 +23,14 @@ onMounted(() => {
   <div class="beers">
     <header class="beers__header">
       <span class="beers__icon">🍺</span>
-      <div>
+      <div class="beers__header-text">
         <h1 class="beers__title">ACB Beer Festival</h1>
         <p v-if="!beersStore.isLoading && beersStore.beers.length" class="beers__count">
           <template v-if="remaining === 0">All beers tasted!</template>
           <template v-else>{{ remaining }} of {{ beersStore.beers.length }} left to try</template>
         </p>
       </div>
+      <RouterLink :to="{ name: 'results' }" class="beers__results-link">Results</RouterLink>
     </header>
 
     <div v-if="beersStore.isLoading" class="beers__state">
@@ -72,6 +74,26 @@ onMounted(() => {
 .beers__icon {
   font-size: 2rem;
   line-height: 1;
+}
+
+.beers__header-text {
+  flex: 1;
+}
+
+.beers__results-link {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-sky);
+  text-decoration: none;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.beers__results-link:hover {
+  background: rgba(56, 189, 248, 0.1);
 }
 
 .beers__title {
