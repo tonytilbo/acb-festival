@@ -6,7 +6,8 @@ interface Summary {
   firstRegistered: string | null
   lastRegistered: string | null
   totalRatings: number
-  usersWhoHaveRated: number
+  beersRated: number
+  totalBeers: number
 }
 
 const summary = ref<Summary | null>(null)
@@ -70,8 +71,8 @@ function formatDate(iso: string | null): string {
         <dd>{{ summary.totalRatings }}</dd>
       </div>
       <div class="summary__stat">
-        <dt>Users who have rated</dt>
-        <dd>{{ summary.usersWhoHaveRated }}</dd>
+        <dt>Beers that have been rated</dt>
+        <dd>{{ summary.beersRated }} of {{ summary.totalBeers }}</dd>
       </div>
     </dl>
   </div>

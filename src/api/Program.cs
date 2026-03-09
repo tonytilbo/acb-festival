@@ -70,21 +70,22 @@ app.MapGet("/api/summary", async (TableClient ratings, [FromKeyedServices("users
     await foreach (var u in users.QueryAsync<UserEntity>())
         userEntities.Add(u);
 
-    var ratingPartitionKeys = new HashSet<string>();
+    var ratedBeerIds = new HashSet<string>();
     var totalRatings = 0;
-    await foreach (var r in ratings.QueryAsync<RatingEntity>(select: ["PartitionKey"]))
+    await foreach (var r in ratings.QueryAsync<RatingEntity>(select: ["RowKey"]))
     {
-        ratingPartitionKeys.Add(r.PartitionKey);
+        ratedBeerIds.Add(r.RowKey);
         totalRatings++;
     }
 
     return Results.Ok(new
     {
-        TotalUsers         = userEntities.Count,
-        FirstRegistered    = userEntities.Count > 0 ? userEntities.Min(u => u.RegisteredAt) : (DateTimeOffset?)null,
-        LastRegistered     = userEntities.Count > 0 ? userEntities.Max(u => u.RegisteredAt) : (DateTimeOffset?)null,
-        TotalRatings       = totalRatings,
-        UsersWhoHaveRated  = ratingPartitionKeys.Count,
+        TotalUsers        = userEntities.Count,
+        FirstRegistered   = userEntities.Count > 0 ? userEntities.Min(u => u.RegisteredAt) : (DateTimeOffset?)null,
+        LastRegistered    = userEntities.Count > 0 ? userEntities.Max(u => u.RegisteredAt) : (DateTimeOffset?)null,
+        TotalRatings      = totalRatings,
+        BeersRated        = ratedBeerIds.Count,
+        TotalBeers        = BeerData.All.Length,
     });
 })
 .WithName("GetSummary");
