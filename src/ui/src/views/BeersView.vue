@@ -4,7 +4,6 @@ import { useBeersStore } from '@/stores/beers'
 import { useRatingsStore } from '@/stores/ratings'
 import BeerCard from '@/components/BeerCard.vue'
 import ScrollFadeItem from '@/components/ScrollFadeItem.vue'
-import { RouterLink } from 'vue-router'
 
 const beersStore = useBeersStore()
 const ratingsStore = useRatingsStore()
@@ -30,10 +29,6 @@ onMounted(() => {
           <template v-else>{{ remaining }} of {{ beersStore.beers.length }} left to try</template>
         </p>
       </div>
-      <nav class="beers__nav">
-        <RouterLink :to="{ name: 'results' }" class="beers__nav-link">Results</RouterLink>
-        <RouterLink :to="{ name: 'summary' }" class="beers__nav-link">Summary</RouterLink>
-      </nav>
     </header>
 
     <div v-if="beersStore.isLoading" class="beers__state">
@@ -83,26 +78,6 @@ onMounted(() => {
   flex: 1;
 }
 
-.beers__nav {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.beers__nav-link {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--color-sky);
-  text-decoration: none;
-  padding: 0.35rem 0.75rem;
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  border-radius: 999px;
-  white-space: nowrap;
-  transition: background 0.15s;
-}
-
-.beers__nav-link:hover {
-  background: rgba(56, 189, 248, 0.1);
-}
 
 .beers__title {
   font-size: 1.25rem;
