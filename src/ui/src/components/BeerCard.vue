@@ -12,6 +12,27 @@ const descriptionOpen = ref(false)
 const pendingRating = ref<number | null>(null)
 const notes = ref('')
 
+const communityNotesOpen = ref(false)
+const communityNotes = ref<string[]>([])
+const communityNotesLoading = ref(false)
+const communityNotesFetched = ref(false)
+
+async function toggleCommunityNotes() {
+  communityNotesOpen.value = !communityNotesOpen.value
+  if (communityNotesOpen.value && !communityNotesFetched.value) {
+    communityNotesLoading.value = true
+    try {
+      const response = await fetch(`/api/results/${props.beer.id}`)
+      if (!response.ok) throw new Error('Failed to load notes')
+      const data: { rating: number; notes: string | null }[] = await response.json()
+      communityNotes.value = data.map(d => d.notes).filter((n): n is string => !!n?.trim())
+      communityNotesFetched.value = true
+    } finally {
+      communityNotesLoading.value = false
+    }
+  }
+}
+
 const currentRating = () => ratingsStore.getRating(props.beer.id)
 const currentNotes = () => ratingsStore.getNotes(props.beer.id)
 const isSubmitting = () => ratingsStore.isSubmitting(props.beer.id)
@@ -59,7 +80,12 @@ async function handleClear() {
       <div class="card__names">
         <div class="card__title-row">
           <h2 class="card__beer-name">{{ beer.beerName }}</h2>
-          <span class="card__abv">{{ beer.abv.toFixed(1) }}%</span>
+          <div class="card__title-meta">
+            <span class="card__serving" :class="beer.servingMethod === 'Cask' ? 'serving--cask' : 'serving--keg'">
+              {{ beer.servingMethod }}
+            </span>
+            <span class="card__abv">{{ beer.abv.toFixed(1) }}%</span>
+          </div>
         </div>
         <p class="card__sub">{{ beer.style }}</p>
         <p class="card__brewery">{{ beer.brewersName }}</p>
@@ -78,10 +104,25 @@ async function handleClear() {
             <p>{{ beer.description }}</p>
             <div class="card__description-fade" aria-hidden="true" />
           </div>
+          <Transition name="fade">
+            <div v-if="communityNotesOpen" class="card__community-notes">
+              <p v-if="communityNotesLoading" class="card__community-empty">Loading…</p>
+              <template v-else-if="communityNotes.length">
+                <p v-for="(note, i) in communityNotes" :key="i" class="card__community-note">
+                  "{{ note }}"
+                </p>
+              </template>
+              <p v-else class="card__community-empty">No tasting notes yet.</p>
+            </div>
+          </Transition>
+
           <div class="card__actions">
-            <span class="card__serving" :class="beer.servingMethod === 'Cask' ? 'serving--cask' : 'serving--keg'">
-              {{ beer.servingMethod }}
-            </span>
+            <button class="card__community-toggle" @click.stop="toggleCommunityNotes">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              {{ communityNotesOpen ? 'Hide notes' : 'Community notes' }}
+            </button>
             <button
               class="card__rate-btn"
               :class="{ 'card__rate-btn--rated': currentRating() !== null }"
@@ -186,8 +227,15 @@ async function handleClear() {
 .card__title-row {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 0.5rem;
+}
+
+.card__title-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
 }
 
 .card__beer-name {
@@ -273,9 +321,9 @@ async function handleClear() {
 }
 
 .card__serving {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  padding: 0.4rem 0.9rem;
+  padding: 0.25rem 0.6rem;
   border-radius: 999px;
   letter-spacing: 0.01em;
 }
@@ -408,6 +456,61 @@ async function handleClear() {
 
 .crossfade-enter-from,
 .crossfade-leave-to {
+  opacity: 0;
+}
+
+.card__community-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  letter-spacing: 0.01em;
+  font-family: inherit;
+}
+
+.card__community-toggle:hover {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.card__community-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.6rem 0.75rem;
+  background: rgba(148, 163, 184, 0.06);
+  border-left: 2px solid var(--color-border);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.card__community-note {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.card__community-empty {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 </style>
