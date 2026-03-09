@@ -23,7 +23,7 @@ onMounted(() => {
     <header class="beers__header">
       <span class="beers__icon">🍺</span>
       <div class="beers__header-text">
-        <h1 class="beers__title">ACB Beer Festival</h1>
+        <h1 class="beers__title">Shed Brewers Festival</h1>
         <p v-if="!beersStore.isLoading && beersStore.beers.length" class="beers__count">
           <template v-if="remaining === 0">All beers tasted!</template>
           <template v-else>{{ remaining }} of {{ beersStore.beers.length }} left to try</template>

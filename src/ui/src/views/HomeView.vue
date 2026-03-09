@@ -16,7 +16,7 @@ async function enter() {
     <div class="welcome__content">
       <div class="welcome__badge">🍺</div>
 
-      <h1 class="welcome__title">ACB Beer Festival</h1>
+      <h1 class="welcome__title">Shed Brewers Festival</h1>
       <p class="welcome__subtitle">Discover this year's finest ales, lagers &amp; craft brews</p>
 
       <div class="welcome__divider" />
