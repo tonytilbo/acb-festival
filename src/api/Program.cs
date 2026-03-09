@@ -1,5 +1,6 @@
 using Azure.Data.Tables;
 using Azure.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,24 +17,31 @@ builder.Services.AddCors(options =>
 
 // Azure Table Storage — uses Managed Identity in production (AZURE_STORAGE_ACCOUNT_NAME set),
 // falls back to Azurite / connection string for local development.
-builder.Services.AddSingleton<TableClient>(_ =>
+TableClient MakeTableClient(string tableName, IConfiguration config)
 {
-    var accountName = builder.Configuration["AZURE_STORAGE_ACCOUNT_NAME"];
+    var accountName = config["AZURE_STORAGE_ACCOUNT_NAME"];
     if (!string.IsNullOrEmpty(accountName))
     {
         var endpoint = new Uri($"https://{accountName}.table.core.windows.net");
-        return new TableClient(endpoint, "Ratings", new DefaultAzureCredential());
+        return new TableClient(endpoint, tableName, new DefaultAzureCredential());
     }
+    var connectionString = config.GetConnectionString("AzureStorage") ?? "UseDevelopmentStorage=true";
+    return new TableClient(connectionString, tableName);
+}
 
-    var connectionString = builder.Configuration.GetConnectionString("AzureStorage")
-        ?? "UseDevelopmentStorage=true";
-    return new TableClient(connectionString, "Ratings");
-});
+builder.Services.AddSingleton<TableClient>(sp =>
+    MakeTableClient("Ratings", builder.Configuration));
+
+builder.Services.AddKeyedSingleton<TableClient>("users", (sp, _) =>
+    MakeTableClient("Users", builder.Configuration));
 
 var app = builder.Build();
 
 var tableClient = app.Services.GetRequiredService<TableClient>();
 await tableClient.CreateIfNotExistsAsync();
+
+var usersTableClient = app.Services.GetRequiredKeyedService<TableClient>("users");
+await usersTableClient.CreateIfNotExistsAsync();
 
 if (app.Environment.IsDevelopment())
 {
@@ -42,12 +50,44 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors();
 
-app.MapPost("/api/register", () =>
+app.MapPost("/api/register", async ([FromKeyedServices("users")] TableClient users) =>
 {
     var userId = Guid.NewGuid().ToString();
+    var registeredAt = DateTimeOffset.UtcNow;
+    await users.UpsertEntityAsync(new UserEntity
+    {
+        PartitionKey   = "user",
+        RowKey         = userId,
+        RegisteredAt   = registeredAt,
+    });
     return Results.Ok(new { userId });
 })
 .WithName("Register");
+
+app.MapGet("/api/summary", async (TableClient ratings, [FromKeyedServices("users")] TableClient users) =>
+{
+    var userEntities = new List<UserEntity>();
+    await foreach (var u in users.QueryAsync<UserEntity>())
+        userEntities.Add(u);
+
+    var ratingPartitionKeys = new HashSet<string>();
+    var totalRatings = 0;
+    await foreach (var r in ratings.QueryAsync<RatingEntity>(select: ["PartitionKey"]))
+    {
+        ratingPartitionKeys.Add(r.PartitionKey);
+        totalRatings++;
+    }
+
+    return Results.Ok(new
+    {
+        TotalUsers         = userEntities.Count,
+        FirstRegistered    = userEntities.Count > 0 ? userEntities.Min(u => u.RegisteredAt) : (DateTimeOffset?)null,
+        LastRegistered     = userEntities.Count > 0 ? userEntities.Max(u => u.RegisteredAt) : (DateTimeOffset?)null,
+        TotalRatings       = totalRatings,
+        UsersWhoHaveRated  = ratingPartitionKeys.Count,
+    });
+})
+.WithName("GetSummary");
 
 app.MapGet("/api/beers", () => Results.Ok(BeerData.All))
    .WithName("GetBeers");
@@ -136,6 +176,15 @@ app.Run();
 record Beer(int Id, string BrewersName, string BeerName, string Style, decimal Abv, string Description, string ServingMethod);
 
 record RatingRequest(string UserId, int BeerId, int Rating, string? Notes);
+
+class UserEntity : ITableEntity
+{
+    public string PartitionKey { get; set; } = "user";
+    public string RowKey { get; set; } = string.Empty; // userId
+    public DateTimeOffset RegisteredAt { get; set; }
+    public DateTimeOffset? Timestamp { get; set; }
+    public Azure.ETag ETag { get; set; }
+}
 
 class RatingEntity : ITableEntity
 {

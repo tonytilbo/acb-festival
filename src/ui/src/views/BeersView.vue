@@ -30,7 +30,10 @@ onMounted(() => {
           <template v-else>{{ remaining }} of {{ beersStore.beers.length }} left to try</template>
         </p>
       </div>
-      <RouterLink :to="{ name: 'results' }" class="beers__results-link">Results</RouterLink>
+      <nav class="beers__nav">
+        <RouterLink :to="{ name: 'results' }" class="beers__nav-link">Results</RouterLink>
+        <RouterLink :to="{ name: 'summary' }" class="beers__nav-link">Summary</RouterLink>
+      </nav>
     </header>
 
     <div v-if="beersStore.isLoading" class="beers__state">
@@ -80,7 +83,12 @@ onMounted(() => {
   flex: 1;
 }
 
-.beers__results-link {
+.beers__nav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.beers__nav-link {
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--color-sky);
@@ -92,7 +100,7 @@ onMounted(() => {
   transition: background 0.15s;
 }
 
-.beers__results-link:hover {
+.beers__nav-link:hover {
   background: rgba(56, 189, 248, 0.1);
 }
 
