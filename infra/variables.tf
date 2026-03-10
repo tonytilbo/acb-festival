@@ -32,3 +32,9 @@ variable "api_image_tag" {
   type        = string
   default     = "latest"
 }
+
+variable "admin_key" {
+  description = "Secret key required for admin API endpoints (import/clear beers)"
+  type        = string
+  sensitive   = true
+}

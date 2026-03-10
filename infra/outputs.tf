@@ -29,8 +29,7 @@ output "managed_identity_client_id" {
   value       = azurerm_user_assigned_identity.api.client_id
 }
 
-#output "custom_domain_validation_token" {
-#  description = "CNAME validation token — add as a CNAME record at your DNS provider"
-#  value       = azurerm_static_web_app_custom_domain.main.validation_token
-#  sensitive   = true
-#}
+output "custom_domain_cname_target" {
+  description = "Point a CNAME record for 'festival' at this value to enable the custom domain"
+  value       = azurerm_static_web_app.frontend.default_host_name
+}

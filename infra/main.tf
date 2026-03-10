@@ -52,6 +52,11 @@ resource "azurerm_storage_table" "users" {
   storage_account_name = azurerm_storage_account.main.name
 }
 
+resource "azurerm_storage_table" "beers" {
+  name                 = "Beers"
+  storage_account_name = azurerm_storage_account.main.name
+}
+
 # ---------------------------------------------------------------------------
 # Container Registry
 # ---------------------------------------------------------------------------
@@ -142,6 +147,11 @@ resource "azurerm_container_app" "api" {
         name  = "ASPNETCORE_ENVIRONMENT"
         value = "Production"
       }
+
+      env {
+        name  = "ADMIN_KEY"
+        value = var.admin_key
+      }
     }
   }
 
@@ -171,8 +181,8 @@ resource "azurerm_static_web_app" "frontend" {
   sku_size            = "Standard"
 }
 
-#resource "azurerm_static_web_app_custom_domain" "main" {
-#  static_web_app_id = azurerm_static_web_app.frontend.id
-#  domain_name       = var.custom_domain
-#  validation_type   = "cname-delegation"
-#}
+resource "azurerm_static_web_app_custom_domain" "main" {
+  static_web_app_id = azurerm_static_web_app.frontend.id
+  domain_name       = var.custom_domain
+  validation_type   = "cname-delegation"
+}
