@@ -197,6 +197,20 @@ app.MapGet("/api/results/{beerId}", async (int beerId, TableClient table) =>
 })
 .WithName("GetBeerRatings");
 
+app.MapGet("/api/notes-counts", async (TableClient table) =>
+{
+    var counts = new Dictionary<int, int>();
+    await foreach (var entity in table.QueryAsync<RatingEntity>(select: ["RowKey", "Notes"]))
+    {
+        if (!string.IsNullOrWhiteSpace(entity.Notes) && int.TryParse(entity.RowKey, out var beerId))
+        {
+            counts[beerId] = counts.GetValueOrDefault(beerId) + 1;
+        }
+    }
+    return Results.Ok(counts);
+})
+.WithName("GetNotesCounts");
+
 // ---------------------------------------------------------------------------
 // Admin endpoints — require X-Admin-Key header when ADMIN_KEY is configured
 // ---------------------------------------------------------------------------

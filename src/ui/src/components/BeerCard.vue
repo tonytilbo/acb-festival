@@ -4,7 +4,7 @@ import type { Beer } from '@/stores/beers'
 import { useRatingsStore } from '@/stores/ratings'
 import RatingPicker from './RatingPicker.vue'
 
-const props = defineProps<{ beer: Beer }>()
+const props = defineProps<{ beer: Beer; notesCount?: number }>()
 
 const ratingsStore = useRatingsStore()
 const pickerOpen = ref(false)
@@ -118,9 +118,9 @@ async function handleClear() {
 
           <div class="card__actions">
             <button class="card__community-toggle" @click.stop="toggleCommunityNotes">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
+              <span v-if="!communityNotesOpen && (notesCount ?? 0) > 0" class="card__notes-count">
+                {{ notesCount }}
+              </span>
               {{ communityNotesOpen ? 'Hide notes' : 'Community notes' }}
             </button>
             <button
@@ -479,6 +479,16 @@ async function handleClear() {
 .card__community-toggle:hover {
   background: var(--color-border);
   color: var(--color-text);
+}
+
+.card__notes-count {
+  background: rgba(148, 163, 184, 0.2);
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  line-height: 1.4;
 }
 
 .card__community-notes {

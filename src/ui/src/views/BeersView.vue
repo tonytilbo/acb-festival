@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useBeersStore } from '@/stores/beers'
 import { useRatingsStore } from '@/stores/ratings'
 import BeerCard from '@/components/BeerCard.vue'
@@ -7,14 +7,19 @@ import ScrollFadeItem from '@/components/ScrollFadeItem.vue'
 
 const beersStore = useBeersStore()
 const ratingsStore = useRatingsStore()
+const notesCounts = ref<Record<number, number>>({})
 
 const remaining = computed(() =>
   beersStore.beers.filter(b => ratingsStore.getRating(b.id) === null).length
 )
 
-onMounted(() => {
+onMounted(async () => {
   beersStore.fetchBeers()
   ratingsStore.fetchRatings()
+  try {
+    const res = await fetch('/api/notes-counts')
+    if (res.ok) notesCounts.value = await res.json()
+  } catch {}
 })
 </script>
 
@@ -43,7 +48,7 @@ onMounted(() => {
 
     <ul v-else class="beers__list">
       <ScrollFadeItem v-for="beer in beersStore.beers" :key="beer.id">
-        <BeerCard :beer="beer" />
+        <BeerCard :beer="beer" :notes-count="notesCounts[beer.id] ?? 0" />
       </ScrollFadeItem>
     </ul>
   </div>
