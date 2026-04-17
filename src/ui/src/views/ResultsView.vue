@@ -205,6 +205,12 @@ function brewerName(beerId: number): string {
   to { transform: rotate(360deg); }
 }
 
+.results__breakdown-loading {
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem;
+}
+
 .results__list {
   list-style: none;
   padding: 0;
