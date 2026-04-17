@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -48,11 +47,6 @@ await usersTableClient.CreateIfNotExistsAsync();
 
 var beersTableClient = app.Services.GetRequiredKeyedService<TableClient>("beers");
 await beersTableClient.CreateIfNotExistsAsync();
-
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
 
 app.UseCors();
 
@@ -259,7 +253,7 @@ app.MapDelete("/api/admin/beers", async (HttpContext ctx, [FromKeyedServices("be
 
 app.Run();
 
-record Beer(int Id, string BrewersName, string BeerName, string Style, decimal Abv, string Description, string ServingMethod);
+record Beer(int Id, string BrewersName, string BeerName, string Style, double Abv, string Description, string ServingMethod);
 
 record RatingRequest(string UserId, int BeerId, int Rating, string? Notes);
 
@@ -289,7 +283,7 @@ class BeerEntity : ITableEntity
     public string BrewersName   { get; set; } = string.Empty;
     public string BeerName      { get; set; } = string.Empty;
     public string Style         { get; set; } = string.Empty;
-    public decimal Abv          { get; set; }
+    public double Abv           { get; set; }
     public string Description   { get; set; } = string.Empty;
     public string ServingMethod { get; set; } = string.Empty;
     public DateTimeOffset? Timestamp { get; set; }
