@@ -14,10 +14,8 @@ async function enter() {
 <template>
   <main class="welcome">
     <div class="welcome__content">
-      <div class="welcome__badge">🍺</div>
-
-      <h1 class="welcome__title">Shed Brewers Festival</h1>
-      <p class="welcome__subtitle">Discover this year's finest ales, lagers &amp; craft brews</p>
+      <img src="/images/cloud.png" alt="" class="welcome__cloud" aria-hidden="true" />
+      <img src="/images/logo-text.png" alt="Shed Brewers Beer Festival" class="welcome__logo" />
 
       <div class="welcome__divider" />
 
@@ -36,7 +34,7 @@ async function enter() {
         @click="enter"
       >
         <span v-if="userStore.isLoading">Setting up your experience…</span>
-        <span v-else>Enter the Festival</span>
+        <span v-else>Continue</span>
       </button>
     </div>
   </main>
@@ -49,8 +47,8 @@ async function enter() {
   align-items: center;
   justify-content: center;
   min-height: 100dvh;
-  padding: 2rem 1.25rem;
-  background: linear-gradient(160deg, #0c1a2e 0%, #0f172a 50%, #0c1a2e 100%);
+  padding: 50px 1.25rem 2rem;
+  background: linear-gradient(160deg, #0D0D0D 0%, #111111 50%, #0D0D0D 100%);
 }
 
 .welcome__content {
@@ -63,24 +61,23 @@ async function enter() {
   gap: 1.25rem;
 }
 
-.welcome__badge {
-  font-size: 4rem;
-  line-height: 1;
-  filter: drop-shadow(0 4px 16px rgba(56, 189, 248, 0.4));
+
+.welcome__cloud {
+  width: 220px;
+  height: auto;
+  position: relative;
+  z-index: 2;
+  margin-bottom: -50px;
+  filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.5));
 }
 
-.welcome__title {
-  font-size: 2.25rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--color-text);
-  line-height: 1.1;
-}
-
-.welcome__subtitle {
-  font-size: 1.05rem;
-  color: var(--color-text-muted);
-  line-height: 1.5;
+.welcome__logo {
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 4px 20px rgba(212, 137, 58, 0.35));
 }
 
 .welcome__divider {
@@ -112,7 +109,7 @@ async function enter() {
   width: 100%;
   padding: 1rem 2rem;
   background: var(--color-sky);
-  color: #ffffff;
+  color: #111111;
   font-size: 1.1rem;
   font-weight: 700;
   border: none;
@@ -120,7 +117,9 @@ async function enter() {
   cursor: pointer;
   transition: background 0.2s, transform 0.1s, opacity 0.2s;
   letter-spacing: 0.01em;
-  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
+  box-shadow: 0 4px 14px rgba(212, 137, 58, 0.4);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
 }
 
 .welcome__cta:hover:not(:disabled) {

@@ -328,8 +328,8 @@ async function handleClear() {
   letter-spacing: 0.01em;
 }
 
-.serving--cask { background: rgba(234, 179, 8, 0.15);  color: #fde047; }
-.serving--keg  { background: rgba(148, 163, 184, 0.15); color: #94a3b8; }
+.serving--cask { background: rgba(212, 137, 58, 0.2);  color: #D4893A; }
+.serving--keg  { background: rgba(139, 191, 204, 0.2); color: #8BBFCC; }
 
 .card__rate-btn {
   background: var(--color-sky);

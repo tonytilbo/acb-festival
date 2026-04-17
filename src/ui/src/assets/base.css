@@ -1,27 +1,24 @@
 :root {
-  --color-sky: #38bdf8;
-  --color-sky-dark: #0ea5e9;
-  --color-sky-light: #0369a1;
-  --color-sky-subtle: #0c1a2e;
+  --color-sky: #D4893A;
+  --color-sky-dark: #B8712A;
+  --color-sky-light: #8BBFCC;
+  --color-sky-subtle: #1A1410;
 
-  --color-slate-50:  #f8fafc;
-  --color-slate-100: #f1f5f9;
-  --color-slate-200: #e2e8f0;
-  --color-slate-300: #cbd5e1;
-  --color-slate-500: #64748b;
-  --color-slate-700: #334155;
-  --color-slate-800: #1e293b;
-  --color-slate-900: #0f172a;
-
-  --color-text:         #f1f5f9;
-  --color-text-muted:   #94a3b8;
-  --color-background:   #0f172a;
-  --color-surface:      #1e293b;
-  --color-border:       #334155;
-  --color-border-hover: #475569;
+  --color-text:         #F5F0E8;
+  --color-text-muted:   #9A9080;
+  --color-background:   #111111;
+  --color-surface:      #1E1E1E;
+  --color-border:       #333333;
+  --color-border-hover: #4A4540;
 
   --radius: 12px;
   --radius-lg: 20px;
+}
+
+h1, h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.03em;
 }
 
 *,
