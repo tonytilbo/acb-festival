@@ -13,6 +13,15 @@ const remaining = computed(() =>
   beersStore.beers.filter(b => ratingsStore.getRating(b.id) === null).length
 )
 
+const sortedBeers = computed(() =>
+  [...beersStore.beers].sort((a, b) => {
+    const aRated = ratingsStore.getRating(a.id) !== null
+    const bRated = ratingsStore.getRating(b.id) !== null
+    if (aRated !== bRated) return aRated ? 1 : -1
+    return a.beerName.localeCompare(b.beerName)
+  })
+)
+
 onMounted(async () => {
   beersStore.fetchBeers()
   ratingsStore.fetchRatings()
@@ -46,11 +55,11 @@ onMounted(async () => {
       <button class="beers__retry" @click="beersStore.fetchBeers()">Try again</button>
     </div>
 
-    <ul v-else class="beers__list">
-      <ScrollFadeItem v-for="beer in beersStore.beers" :key="beer.id">
+    <TransitionGroup v-else tag="ul" name="beer-list" class="beers__list">
+      <ScrollFadeItem v-for="beer in sortedBeers" :key="beer.id">
         <BeerCard :beer="beer" :notes-count="notesCounts[beer.id] ?? 0" />
       </ScrollFadeItem>
-    </ul>
+    </TransitionGroup>
   </div>
 </template>
 
@@ -103,6 +112,10 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 0.875rem;
+}
+
+.beer-list-move {
+  transition: transform 0.5s ease;
 }
 
 .beers__state {
