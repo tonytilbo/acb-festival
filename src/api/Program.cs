@@ -56,6 +56,20 @@ var adminKey = app.Configuration["ADMIN_KEY"];
 bool IsAuthorized(HttpContext ctx) =>
     string.IsNullOrEmpty(adminKey) || ctx.Request.Headers["X-Admin-Key"] == adminKey;
 
+app.MapGet("/api/validate", async (string userId, [FromKeyedServices("users")] TableClient users) =>
+{
+    try
+    {
+        await users.GetEntityAsync<UserEntity>("user", userId);
+        return Results.Ok();
+    }
+    catch (Azure.RequestFailedException e) when (e.Status == 404)
+    {
+        return Results.NotFound();
+    }
+})
+.WithName("ValidateUser");
+
 app.MapPost("/api/register", async ([FromKeyedServices("users")] TableClient users) =>
 {
     var userId = Guid.NewGuid().ToString();
@@ -250,6 +264,26 @@ app.MapDelete("/api/admin/beers", async (HttpContext ctx, [FromKeyedServices("be
     return Results.Ok(new { deleted = entities.Count });
 })
 .WithName("ClearBeers");
+
+app.MapDelete("/api/admin/reset", async (HttpContext ctx, TableClient ratings, [FromKeyedServices("users")] TableClient users) =>
+{
+    if (!IsAuthorized(ctx)) return Results.Unauthorized();
+
+    var ratingEntities = new List<RatingEntity>();
+    await foreach (var e in ratings.QueryAsync<RatingEntity>())
+        ratingEntities.Add(e);
+    foreach (var batch in ratingEntities.Chunk(100))
+        await ratings.SubmitTransactionAsync(batch.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
+
+    var userEntities = new List<UserEntity>();
+    await foreach (var e in users.QueryAsync<UserEntity>())
+        userEntities.Add(e);
+    foreach (var batch in userEntities.Chunk(100))
+        await users.SubmitTransactionAsync(batch.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
+
+    return Results.Ok(new { deletedRatings = ratingEntities.Count, deletedUsers = userEntities.Count });
+})
+.WithName("Reset");
 
 app.Run();
 

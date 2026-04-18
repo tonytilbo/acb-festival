@@ -36,5 +36,20 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  return { userId, isRegistered, isLoading, error, register }
+  function clearSession() {
+    userId.value = null
+    setCookie(COOKIE_NAME, '', 0)
+  }
+
+  async function validateSession() {
+    if (!userId.value) return
+    try {
+      const response = await fetch(`/api/validate?userId=${encodeURIComponent(userId.value)}`)
+      if (response.status === 404) clearSession()
+    } catch {
+      // network error — leave session intact and let user retry
+    }
+  }
+
+  return { userId, isRegistered, isLoading, error, register, validateSession }
 })
